@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DES Cryptography Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+            --transition: all 0.3s ease;
+            --border-radius: 10px;
+            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--dark-color);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            width: 100%;
+            max-width: 900px;
+            padding: 0;
+            position: relative;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 25px 40px;
+            text-align: center;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .header p {
+            margin-top: 10px;
+            opacity: 0.8;
+            font-size: 16px;
+        }
+        
+        .des-icon {
+            font-size: 60px;
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            opacity: 0.2;
+            transform: rotate(15deg);
+        }
+        
+        .main-content {
+            padding: 0 40px 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px; /* Tăng khoảng cách giữa các nhóm */
+            position: relative;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 10px; /* Thêm khoảng cách */
+            display: block; /* Đảm bảo label nằm trên input */
+        }
+        
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            z-index: 10;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #e9ecef;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+            background-color: white;
+            color: var(--dark-color);
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+        }
+        
+        .file-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .file-input {
+            position: absolute;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .file-label {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        
+        .file-label:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .file-name {
+            margin-left: 15px;
+            font-size: 14px;
+            color: #6c757d;
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: default; /* Không cho phép nhấn vào */
+        }
+        
+        .toggle-key {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+            z-index: 10;
+        }
+        
+        .toggle-key:focus {
+            outline: none;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 30px;
+            margin-top: 5px;
+        }
+        
+        .radio-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        
+        .radio-container input[type="radio"] {
+            display: none;
+        }
+        
+        .radio-checkmark {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #e9ecef;
+            position: relative;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+        
+        .radio-container:hover .radio-checkmark {
+            border-color: var(--primary-color);
+        }
+        
+        .radio-container input[type="radio"]:checked + .radio-checkmark {
+            border-color: var(--primary-color);
+        }
+        
+        .radio-container input[type="radio"]:checked + .radio-checkmark:after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 0.3s ease-out;
+        }
+        
+        .radio-label {
+            font-size: 16px;
+            user-select: none;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 30px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+        
+        .btn:after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: -100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        
+        .btn:hover:after {
+            left: 100%;
+        }
+        
+        .btn-icon {
+            margin-right: 10px;
+        }
+        
+        .status {
+            margin: 25px 0;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        
+        .status.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .status-success {
+            background-color: rgba(76, 201, 240, 0.15);
+            color: var(--success-color);
+            border: 1px solid rgba(76, 201, 240, 0.3);
+        }
+        
+        .status-error {
+            background-color: rgba(247, 37, 133, 0.15);
+            color: var(--danger-color);
+            border: 1px solid rgba(247, 37, 133, 0.3);
+        }
+        
+        .result-section {
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 30px;
+            display: none;
+            position: relative;
+        }
+        
+        .result-section.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .result-textarea {
+            width: 100%;
+            min-height: 120px;
+            border: 2px solid #e9ecef;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            font-size: 14px;
+            resize: vertical;
+            color: var(--dark-color);
+            background-color: white;
+            margin-top: 10px;
+        }
+        
+        .download-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            color: #6c757d;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        /* Toggle group container */
+        .toggle-group {
+            display: flex;
+            border: 2px solid var(--primary-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            width: fit-content;
+            margin-top: 10px;
+            gap: 0; /* Loại bỏ khoảng cách giữa các nút */
+        }
+
+        /* Hide the default radio buttons */
+        .toggle-group input[type="radio"] {
+            display: none;
+        }
+
+        /* Toggle option styles */
+        .toggle-option {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-color);
+            background-color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            border: none; /* Loại bỏ viền giữa các nút */
+        }
+
+        /* Active state */
+        .toggle-group input[type="radio"]:checked + .toggle-option {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Hover effect */
+        .toggle-option:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .glass-card {
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: 20px;
+                border-radius: 0;
+            }
+            
+            .main-content {
+                padding: 0 20px 20px;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-card">
+        <div class="header">
+            <i class="fas fa-key des-icon"></i>
+            <h1>DES CRYPTOGRAPHY TOOL</h1>
+            <p>Mã hóa và giải mã file với thuật toán DES an toàn</p>
+        </div>
+        
+        <div class="main-content">
+            <form id="des-form">
+                <!-- File Input -->
+                <div class="form-group">
+                    <label for="fileInput">Chọn file</label>
+                    <div class="file-input-container">
+                        <label class="file-label" for="fileInput">
+                            <i class="fas fa-file-upload"></i>
+                            <span>Chọn File</span>
+                        </label>
+                        <input type="file" id="fileInput" class="file-input">
+                        <span class="file-name" id="fileName">Chưa chọn file nào</span>
+                    </div>
+                </div>
+                
+                <!-- Key Input -->
+                <div class="form-group">
+                    <label for="keyInput">Khóa mã hóa</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="keyInput" class="form-control" placeholder="Nhập khóa mã hóa/giải mã">
+                        <button type="button" class="toggle-key" id="toggleKey">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Mode Selection -->
+                <div class="form-group">
+                    <label>Chọn chế độ</label>
+                    <div class="toggle-group">
+                        <input type="radio" id="encryptMode" name="mode" value="encrypt" checked>
+                        <label for="encryptMode" class="toggle-option">Mã hóa</label>
+
+                        <input type="radio" id="decryptMode" name="mode" value="decrypt">
+                        <label for="decryptMode" class="toggle-option">Giải mã</label>
+                    </div>
+                </div>
+                
+                <!-- Process Button -->
+                <button type="button" id="processBtn" class="btn">
+                    <i class="fas fa-cogs btn-icon"></i>
+                    <span>Thực hiện</span>
+                </button>
+                
+                <!-- Status Message -->
+                <div id="status" class="status">
+                    <i class="fas fa-info-circle"></i>
+                    <span id="statusMessage"></span>
+                </div>
+                
+                <!-- Result Section -->
+                <div id="resultSection" class="result-section">
+                    <label for="resultOutput">Kết quả:</label>
+                    <textarea id="resultOutput" class="result-textarea" readonly></textarea>
+                    <button type="button" id="downloadBtn" class="download-btn">
+                        <i class="fas fa-download"></i>
+                        <span>Tải xuống file</span>
+                    </button>
+                </div>
+            </form>
+            
+            <div class="footer">
+                <p>© 2025 DES Cryptography Tool | Bảo mật dữ liệu của bạn là ưu tiên hàng đầu</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Biến toàn cục để lưu dữ liệu
+        let currentFile = null;
+        let resultData = null;
+        let resultFileName = '';
+        
+        // DOM Elements
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const keyInput = document.getElementById('keyInput');
+        const toggleKey = document.getElementById('toggleKey');
+        const processBtn = document.getElementById('processBtn');
+        const status = document.getElementById('status');
+        const statusMessage = document.getElementById('statusMessage');
+        const resultSection = document.getElementById('resultSection');
+        const resultOutput = document.getElementById('resultOutput');
+        const downloadBtn = document.getElementById('downloadBtn');
+        
+        // Event Listeners
+        fileInput.addEventListener('change', handleFileSelect);
+        toggleKey.addEventListener('click', toggleKeyVisibility);
+        processBtn.addEventListener('click', processFile);
+        downloadBtn.addEventListener('click', downloadResult);
+        
+        // Xử lý khi chọn file
+        function handleFileSelect(e) {
+            if (e.target.files.length > 0) {
+                currentFile = e.target.files[0];
+                fileName.textContent = currentFile.name;
+                fileName.style.color = '#4361ee';
+            }
+        }
+        
+        // Hiển thị/Ẩn khóa
+        function toggleKeyVisibility() {
+            const type = keyInput.type;
+            
+            if (type === 'password') {
+                keyInput.type = 'text';
+                toggleKey.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                keyInput.type = 'password';
+                toggleKey.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        }
+        
+        // Hiển thị thông báo trạng thái
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            status.className = type === 'success' 
+                ? 'status status-success show' 
+                : 'status status-error show';
+            
+            // Tự động ẩn sau 5 giây
+            setTimeout(() => {
+                status.classList.remove('show');
+            }, 5000);
+        }
+        
+        // Xử lý file
+        function processFile() {
+            const key = keyInput.value;
+            if (!key) {
+                showStatus('Vui lòng nhập khóa!', 'error');
+                return;
+            }
+            
+            if (!currentFile) {
+                showStatus('Vui lòng chọn file!', 'error');
+                return;
+            }
+            
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            
+            try {
+                // Thay đổi văn bản nút và hiển thị hiệu ứng đang xử lý
+                const originalBtnText = processBtn.innerHTML;
+                processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+                processBtn.disabled = true;
+                
+                // Sử dụng setTimeout để tạo hiệu ứng xử lý
+                setTimeout(() => {
+                    readAndProcessFile(currentFile, key, mode);
+                    
+                    // Khôi phục nút sau khi hoàn thành
+                    processBtn.innerHTML = originalBtnText;
+                    processBtn.disabled = false;
+                }, 800);
+            } catch (error) {
+                console.error(error);
+                // Khôi phục nút nếu có lỗi
+                processBtn.innerHTML = '<i class="fas fa-cogs btn-icon"></i><span>Thực hiện</span>';
+                processBtn.disabled = false;
+                
+                // Ẩn kết quả nếu đã hiển thị trước đó
+                resultSection.classList.remove('show');
+            }
+        }
+        
+        // Đọc và xử lý file
+        function readAndProcessFile(file, key, mode) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    let result;
+                    const wordArray = CryptoJS.lib.WordArray.create(new Uint8Array(e.target.result));
+                    
+                    if (mode === 'encrypt') {
+                        // Mã hóa file
+                        result = encryptData(wordArray, key);
+                        resultFileName = file.name + '.encrypted';
+                    } else {
+                        // Giải mã file
+                        result = decryptData(wordArray, key);
+                        resultFileName = file.name + '.decrypted';
+                    }
+                    
+                    // Lưu kết quả và hiển thị
+                    resultData = result;
+                    displayResult(result);
+                    
+                    // Hiển thị thông báo thành công
+                    const actionText = mode === 'encrypt' ? 'Mã hóa' : 'Giải mã';
+                    showStatus(`${actionText} thành công!`, 'success');
+                } catch (error) {
+                    // Không hiển thị lỗi (theo yêu cầu)
+                    console.error(error);
+                    // Ẩn kết quả nếu đã hiển thị trước đó
+                    resultSection.classList.remove('show');
+                }
+            };
+            
+            reader.onerror = function() {
+                console.error('Không thể đọc file');
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // Mã hóa dữ liệu dạng WordArray sử dụng DES
+        function encryptData(data, key) {
+            // Điều chỉnh khóa để sử dụng với DES
+            const adjustedKey = adjustKeyForDES(key);
+            
+            // Mã hóa dữ liệu
+            const encrypted = CryptoJS.DES.encrypt(data, adjustedKey, {
+                mode: CryptoJS.mode.ECB,
+                padding: CryptoJS.pad.Pkcs7
+            });
+            
+            return encrypted.toString();
+        }
+        
+        // Giải mã dữ liệu dạng chuỗi sử dụng DES
+        function decryptData(data, key) {
+            // Điều chỉnh khóa để sử dụng với DES
+            const adjustedKey = adjustKeyForDES(key);
+            
+            // Giải mã dữ liệu
+            const decrypted = CryptoJS.DES.decrypt(data, adjustedKey, {
+                mode: CryptoJS.mode.ECB,
+                padding: CryptoJS.pad.Pkcs7
+            });
+            
+            return decrypted.toString(CryptoJS.enc.Utf8);
+        }
+        
+        // Điều chỉnh khóa để phù hợp với yêu cầu DES (không giới hạn 8 ký tự)
+        function adjustKeyForDES(key) {
+            // CryptoJS sẽ xử lý khóa và tạo khóa thích hợp cho DES
+            return CryptoJS.enc.Utf8.parse(key);
+        }
+        
+        // Hiển thị kết quả
+        function displayResult(result) {
+            resultOutput.value = result;
+            resultSection.classList.add('show');
+        }
+        
+        // Tải xuống kết quả
+        function downloadResult() {
+            if (!resultData) {
+                return;
+            }
+            
+            const blob = new Blob([resultData], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = resultFileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // Hiệu ứng khi nhấn nút tải xuống
+            const originalBtnText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i class="fas fa-check"></i> Đã tải xuống';
+            downloadBtn.style.backgroundColor = '#45a049';
+            
+            setTimeout(() => {
+                downloadBtn.innerHTML = originalBtnText;
+                downloadBtn.style.backgroundColor = '';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
